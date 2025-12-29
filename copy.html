@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido de Almacén - Electro Sur Este</title>
+    <style>
+        :root {
+            --primary-blue: #0046ad;
+            --border-dark: #333333;
+            --text-gray: #555555;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #e9ecef;
+            margin: 0;
+            padding: 20px;
+            color: #212529;
+        }
+
+        .contenedor-principal {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .hoja-a4 {
+            background: white;
+            width: 820px;
+            padding: 50px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            position: relative;
+            min-height: 1050px;
+            box-sizing: border-box;
+        }
+
+        /* CABECERA CORPORATIVA */
+        .header-table {
+            width: 100%;
+            border: none;
+            margin-bottom: 30px;
+        }
+
+        .logo-area {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            line-height: 1.2;
+            text-align: left;
+        }
+
+        .titulo-area {
+            text-align: center;
+        }
+
+        .titulo-area h1 {
+            font-size: 26px;
+            font-weight: 900;
+            margin: 0;
+            color: var(--primary-blue);
+            letter-spacing: 1px;
+        }
+
+        .numero-area {
+            text-align: right;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .numero-area span {
+            color: #d32f2f;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* BLOQUE DE DATOS */
+        .grid-datos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .campo-input {
+            border-bottom: 1.5px solid #ccc;
+            padding: 5px 0;
+        }
+
+        .campo-input label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .campo-input input, .campo-input select {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            font-weight: 500;
+        }
+
+        /* TABLA DE ARTÍCULOS CON MARCA DE AGUA */
+        .tabla-wrapper {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .marca-agua-pdf {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 420px;
+            height: 420px;
+            background: url('logoelse.png') no-repeat center;
+            background-size: contain;
+            opacity: 0.08; /* Sutil para no entorpecer la lectura */
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .tabla-materiales {
+            width: 100%;
+            border-collapse: collapse;
+            position: relative;
+            z-index: 2;
+            table-layout: fixed; /* Evita que las celdas se deformen */
+        }
+
+        .tabla-materiales th {
+            background-color: var(--primary-blue);
+            color: white;
+            font-size: 11px;
+            padding: 12px 5px;
+            border: 1px solid var(--primary-blue);
+            text-transform: uppercase;
+        }
+
+        .tabla-materiales td {
+            border: 1px solid #444; /* Bordes más oscuros para impresión */
+            height: 38px;
+            padding: 0;
+        }
+
+        /* INPUTS TOTALMENTE TRANSPARENTES */
+        .tabla-materiales input, .tabla-materiales select {
+            width: 100%;
+            height: 100%;
+            border: none !important;
+            padding: 0 10px;
+            background: transparent !important;
+            font-size: 13px;
+            outline: none;
+            box-sizing: border-box;
+            appearance: none; /* Quita flechas de select */
+            -webkit-appearance: none;
+        }
+
+        /* FIRMAS */
+        .seccion-firmas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            margin-top: 100px;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .linea-firma {
+            border-top: 1.5px solid #000;
+            padding-top: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        /* BOTONES LATERALES */
+        .controles-flotantes {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-accion {
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo-col { width: 150px; }
+        .logo-col img { max-width: 140px; height: auto; }
+
+        .btn-print { background: var(--primary-blue); }
+        .btn-save { background: #27ae60; }
+        .btn-clear { background: #7f8c8d; }
+
+        .btn-accion:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        /* AJUSTES PARA IMPRESIÓN PDF */
+        @media print {
+            body { background: white; padding: 0; }
+            .contenedor-principal { display: block; }
+            .controles-flotantes { display: none; }
+            .hoja-a4 { box-shadow: none; width: 100%; padding: 0; margin: 0; }
+            .marca-agua-pdf { opacity: 0.12 !important; visibility: visible !important; }
+            
+            /* Forzar bordes negros y colores vivos */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .tabla-materiales td { border: 1.5px solid #000 !important; }
+            .tabla-materiales th { border: 1.5px solid #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor-principal">
+    <div class="hoja-a4">
+<table class="header-table">
+            <tr>
+                <td class="logo-col">
+            <img src="logoelse1.png" alt="Logo">
+                <div style="font-size: 12px; font-weight: bold; color: #0046ad;">Gerencia General de APURÍMAC </div>
+                <td class="titulo-area">
+                    <h1>PEDIDO DE ALMACÉN</h1>
+                   <div style="font-size: 12px; font-weight: bold; color: #0046ad;">Segundo Uso </div>
+                </td>
+                <td class="numero-area">N°: <span id="numDoc">0001</span></td>
+            </tr>
+        </table>
+
+        <div class="grid-datos">
+            <div class="campo-input">
+                <label>Área Solicitante</label>
+                <select>
+                    <option value="">-- Seleccionar --</option>
+                    <option>Mantenimiento</option>
+                    <option>Comercial</option>
+                    <option>Operaciones</option>
+                    <option>Administración</option>
+                </select>
+            </div>
+            <div class="campo-input">
+                <label>Personal que Recibe</label>
+                <select id="selectPersonal"></select>
+            </div>
+            <div class="campo-input">
+                <label>Orden de Trabajo (OT)</label>
+                <input type="text" placeholder="Ej. OT-2025-088">
+            </div>
+            <div class="campo-input">
+                <label>Fecha de Emisión</label>
+                <input type="date" id="inputFecha">
+            </div>
+        </div>
+
+        <div class="tabla-wrapper">
+            <div class="marca-agua-pdf"></div>
+            <table class="tabla-materiales">
+                <thead>
+                    <tr>
+                        <th width="10%">CANT.</th>
+                        <th width="18%">UNIDAD</th>
+                        <th width="47%">DESCRIPCIÓN DEL MATERIAL</th>
+                        <th width="25%">DESTINO / USO</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="seccion-firmas">
+            <div class="linea-firma">JEFE ADMINISTRACIÓN</div>
+            <div class="linea-firma">ENTREGA CONFORME</div>
+            <div class="linea-firma">JEFE DE SECCIÓN</div>
+            <div class="linea-firma">RECIBÍ CONFORME</div>
+        </div>
+    </div>
+
+    <div class="controles-flotantes">
+        <button class="btn-accion btn-print" onclick="window.print()">🖨️ GENERAR PDF</button>
+        <button class="btn-accion btn-save" onclick="guardar()">💾 GUARDAR DOC</button>
+        <button class="btn-accion btn-clear" onclick="location.reload()">🧹 NUEVO PEDIDO</button>
+    </div>
+</div>
+
+<script>
+    const personal = ["Robert Monzon Salas", "Benigno Martinez Barazorda", "Ramiro Lopez Medrano", "Ruben Huamanñahui Ticona", "Alfredo Mencia Chipa", "Josue Leon Cruz", "Luis Coaquira Condori", "Deliben Rodas Centeno"];
+    const unidades = ["PIEZAS", "METRO", "UNIDAD", "JUEGO", "KILOGRAMO"];
+
+    // Cargar Personal
+    const pSel = document.getElementById('selectPersonal');
+    personal.sort().forEach(p => {
+        let opt = document.createElement('option');
+        opt.value = p; opt.textContent = p;
+        pSel.appendChild(opt);
+    });
+
+    // Generar 12 Filas
+    const tabla = document.getElementById('cuerpoTabla');
+    for(let i=0; i<12; i++) {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" style="text-align: center;"></td>
+            <td>
+                <select>
+                    <option value=""></option>
+                    ${unidades.map(u => `<option value="${u}">${u}</option>`).join('')}
+                </select>
+            </td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+        `;
+        tabla.appendChild(tr);
+    }
+
+    // Configuración inicial
+    document.getElementById('inputFecha').valueAsDate = new Date();
+    let n = localStorage.getItem('pedido_n') || 1;
+    document.getElementById('numDoc').innerText = n.toString().padStart(4, '0');
+
+    function guardar() {
+        n++;
+        localStorage.setItem('pedido_n', n);
+        document.getElementById('numDoc').innerText = n.toString().padStart(4, '0');
+        alert("Número correlativo actualizado.");
+    }
+</script>
+
+</body>
+</html>
